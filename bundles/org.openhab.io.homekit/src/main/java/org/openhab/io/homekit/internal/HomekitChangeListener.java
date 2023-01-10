@@ -31,6 +31,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.common.registry.RegistryChangeListener;
+import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
@@ -40,6 +41,8 @@ import org.openhab.core.items.Metadata;
 import org.openhab.core.items.MetadataKey;
 import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.storage.Storage;
+import org.openhab.core.thing.ThingRegistry;
+import org.openhab.core.thing.link.ItemChannelLinkRegistry;
 import org.openhab.io.homekit.internal.accessories.AbstractHomekitAccessoryImpl;
 import org.openhab.io.homekit.internal.accessories.DummyHomekitAccessory;
 import org.openhab.io.homekit.internal.accessories.HomekitAccessoryFactory;
@@ -64,6 +67,8 @@ public class HomekitChangeListener implements ItemRegistryChangeListener {
     private final ItemRegistry itemRegistry;
     private final HomekitAccessoryRegistry accessoryRegistry = new HomekitAccessoryRegistry();
     private final MetadataRegistry metadataRegistry;
+    private final ThingRegistry thingRegistry;
+    private final ItemChannelLinkRegistry itemChannelLinkRegistry;
     private final Storage<Object> storage;
     private final RegistryChangeListener<Metadata> metadataChangeListener;
     private HomekitAccessoryUpdater updater = new HomekitAccessoryUpdater();
@@ -88,9 +93,12 @@ public class HomekitChangeListener implements ItemRegistryChangeListener {
      */
     private final Debouncer applyUpdatesDebouncer;
 
-    HomekitChangeListener(ItemRegistry itemRegistry, HomekitSettings settings, MetadataRegistry metadataRegistry,
-            Storage<Object> storage, int instance) {
+    HomekitChangeListener(ItemRegistry itemRegistry, ThingRegistry thingRegistry,
+            ItemChannelLinkRegistry itemChannelLinkRegistry, HomekitSettings settings,
+            MetadataRegistry metadataRegistry, Storage<Object> storage, int instance) {
         this.itemRegistry = itemRegistry;
+        this.itemChannelLinkRegistry = itemChannelLinkRegistry;
+        this.thingRegistry = thingRegistry;
         this.settings = settings;
         this.metadataRegistry = metadataRegistry;
         this.storage = storage;
@@ -450,9 +458,10 @@ public class HomekitChangeListener implements ItemRegistryChangeListener {
                 itemConfiguration);
         logger.trace("Item {} is a HomeKit accessory of types {}. Primary type is {}", item.getName(), accessoryTypes,
                 primaryAccessoryType);
+        final OfflineItemDecorator offlineItemDecorator = new OfflineItemDecorator((GenericItem) item,
+                itemChannelLinkRegistry, thingRegistry);
         final HomekitOHItemProxy itemProxy = new HomekitOHItemProxy(item);
-        final HomekitTaggedItem taggedItem = new HomekitTaggedItem(new HomekitOHItemProxy(item), primaryAccessoryType,
-                itemConfiguration);
+        final HomekitTaggedItem taggedItem = new HomekitTaggedItem(itemProxy, primaryAccessoryType, itemConfiguration);
         try {
             final AbstractHomekitAccessoryImpl accessory = HomekitAccessoryFactory.create(taggedItem, metadataRegistry,
                     updater, settings);
