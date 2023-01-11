@@ -29,26 +29,26 @@ import org.openhab.core.types.UnDefType;
 
 @NonNullByDefault
 public class OfflineItemDecorator extends GenericItem {
-    private GenericItem proxy;
+    private GenericItem wrappedItem;
 
     private Optional<Thing> itemThing;
 
-    public OfflineItemDecorator(GenericItem proxy, ItemChannelLinkRegistry itemChannelLinkRegistry,
+    public OfflineItemDecorator(GenericItem wrappedItem, ItemChannelLinkRegistry itemChannelLinkRegistry,
             ThingRegistry thingRegistry) {
-        super(proxy.getName(), proxy.getType());
+        super(wrappedItem.getName(), wrappedItem.getType());
         // TODO - probably need to lazily do this during subscribe? IDK... super hacky
-        var itemChannelLink = itemChannelLinkRegistry.stream().filter(link -> link.getItemName() == proxy.getName())
+        var itemChannelLink = itemChannelLinkRegistry.stream().filter(link -> link.getItemName() == wrappedItem.getName())
                 .findFirst();
 
         this.itemThing = itemChannelLink.map(link -> thingRegistry.get(link.getLinkedUID().getThingUID()));
-        this.proxy = proxy;
+        this.wrappedItem = wrappedItem;
     }
 
     @Override
     public State getState() {
         var isOnline = this.itemThing.map(thing -> thing.getStatus() == ThingStatus.ONLINE).orElse(true);
         if (isOnline) {
-            return proxy.getState();
+            return wrappedItem.getState();
         } else {
             return UnDefType.UNDEF;
         }
@@ -61,191 +61,191 @@ public class OfflineItemDecorator extends GenericItem {
 
     @Override
     public String getUID() {
-        return proxy.getUID();
+        return wrappedItem.getUID();
     }
 
     @Override
     public @NonNull String getName() {
-        return proxy.getName();
+        return wrappedItem.getName();
     }
 
     @Override
     public @NonNull String getType() {
-        return proxy.getType();
+        return wrappedItem.getType();
     }
 
     @Override
     public List<@NonNull String> getGroupNames() {
-        return proxy.getGroupNames();
+        return wrappedItem.getGroupNames();
     }
 
     @Override
     public void addGroupName(String groupItemName) {
-        proxy.addGroupName(groupItemName);
+        wrappedItem.addGroupName(groupItemName);
     }
 
     @Override
     public void addGroupNames(String... groupItemNames) {
-        proxy.addGroupNames(groupItemNames);
+        wrappedItem.addGroupNames(groupItemNames);
     }
 
     @Override
     public void addGroupNames(List<@NonNull String> groupItemNames) {
-        proxy.addGroupNames(groupItemNames);
+        wrappedItem.addGroupNames(groupItemNames);
     }
 
     @Override
     public void removeGroupName(String groupItemName) {
-        proxy.removeGroupName(groupItemName);
+        wrappedItem.removeGroupName(groupItemName);
     }
 
     @Override
     public void dispose() {
-        proxy.dispose();
+        wrappedItem.dispose();
     }
 
     @Override
     public void setEventPublisher(@Nullable EventPublisher eventPublisher) {
-        proxy.setEventPublisher(eventPublisher);
+        wrappedItem.setEventPublisher(eventPublisher);
     }
 
     @Override
     public void setStateDescriptionService(@Nullable StateDescriptionService stateDescriptionService) {
-        proxy.setStateDescriptionService(stateDescriptionService);
+        wrappedItem.setStateDescriptionService(stateDescriptionService);
     }
 
     @Override
     public void setCommandDescriptionService(@Nullable CommandDescriptionService commandDescriptionService) {
-        proxy.setCommandDescriptionService(commandDescriptionService);
+        wrappedItem.setCommandDescriptionService(commandDescriptionService);
     }
 
     @Override
     public void setUnitProvider(@Nullable UnitProvider unitProvider) {
-        proxy.setUnitProvider(unitProvider);
+        wrappedItem.setUnitProvider(unitProvider);
     }
 
     @Override
     public void setItemStateConverter(@Nullable ItemStateConverter itemStateConverter) {
-        proxy.setItemStateConverter(itemStateConverter);
+        wrappedItem.setItemStateConverter(itemStateConverter);
     }
 
     @Override
     public void setState(State state) {
-        proxy.setState(state);
+        wrappedItem.setState(state);
     }
 
     @Override
     public void send(RefreshType command) {
-        proxy.send(command);
+        wrappedItem.send(command);
     }
 
     @Override
     public String toString() {
-        return proxy.toString();
+        return wrappedItem.toString();
     }
 
     @Override
     public void addStateChangeListener(StateChangeListener listener) {
-        proxy.addStateChangeListener(listener);
+        wrappedItem.addStateChangeListener(listener);
     }
 
     @Override
     public void removeStateChangeListener(StateChangeListener listener) {
-        proxy.removeStateChangeListener(listener);
+        wrappedItem.removeStateChangeListener(listener);
     }
 
     @Override
     public int hashCode() {
-        return proxy.hashCode();
+        return wrappedItem.hashCode();
     }
 
     @Override
     public boolean equals(@Nullable Object obj) {
-        return proxy.equals(obj);
+        return wrappedItem.equals(obj);
     }
 
     @Override
     public Set<@NonNull String> getTags() {
-        return proxy.getTags();
+        return wrappedItem.getTags();
     }
 
     @Override
     public boolean hasTag(String tag) {
-        return proxy.hasTag(tag);
+        return wrappedItem.hasTag(tag);
     }
 
     @Override
     public void addTag(String tag) {
-        proxy.addTag(tag);
+        wrappedItem.addTag(tag);
     }
 
     @Override
     public void addTags(Collection<@NonNull String> tags) {
-        proxy.addTags(tags);
+        wrappedItem.addTags(tags);
     }
 
     @Override
     public void addTags(String... tags) {
-        proxy.addTags(tags);
+        wrappedItem.addTags(tags);
     }
 
     @Override
     public void removeTag(String tag) {
-        proxy.removeTag(tag);
+        wrappedItem.removeTag(tag);
     }
 
     @Override
     public void removeAllTags() {
-        proxy.removeAllTags();
+        wrappedItem.removeAllTags();
     }
 
     @Override
     public @Nullable String getLabel() {
-        return proxy.getLabel();
+        return wrappedItem.getLabel();
     }
 
     @Override
     public void setLabel(@Nullable String label) {
-        proxy.setLabel(label);
+        wrappedItem.setLabel(label);
     }
 
     @Override
     public @Nullable String getCategory() {
-        return proxy.getCategory();
+        return wrappedItem.getCategory();
     }
 
     @Override
     public void setCategory(@Nullable String category) {
-        proxy.setCategory(category);
+        wrappedItem.setCategory(category);
     }
 
     @Override
     public @Nullable StateDescription getStateDescription() {
-        return proxy.getStateDescription();
+        return wrappedItem.getStateDescription();
     }
 
     @Override
     public @Nullable StateDescription getStateDescription(@Nullable Locale locale) {
-        return proxy.getStateDescription(locale);
+        return wrappedItem.getStateDescription(locale);
     }
 
     @Override
     public @Nullable CommandDescription getCommandDescription(@Nullable Locale locale) {
-        return proxy.getCommandDescription(locale);
+        return wrappedItem.getCommandDescription(locale);
     }
 
     @Override
     public boolean isAcceptedState(List<@NonNull Class<? extends @NonNull State>> acceptedDataTypes, State state) {
-        return proxy.isAcceptedState(acceptedDataTypes, state);
+        return wrappedItem.isAcceptedState(acceptedDataTypes, state);
     }
 
     @Override
     public List<Class<? extends Command>> getAcceptedCommandTypes() {
-        return this.proxy.getAcceptedCommandTypes();
+        return this.wrappedItem.getAcceptedCommandTypes();
     }
 
     @Override
     public List<Class<? extends State>> getAcceptedDataTypes() {
-        return this.proxy.getAcceptedDataTypes();
+        return this.wrappedItem.getAcceptedDataTypes();
     }
 }
